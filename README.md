@@ -4,7 +4,7 @@ Authors:
 Doan Dang Quang  
 Gian Thanh Sang
 
-This project delivers an RTL implementation of an area-efficient AES-128 encryption core—built around a round-reusing, resource-sharing architecture—and integrates it via an Avalon-MM wrapper into a NIOS II SoC on the Altera Cyclone II DE2 FPGA. The design was verified with ModelSim and synthesized in Quartus II.
+This project delivers an RTL implementation of an area-efficient AES-128 encryption based on proposed architecture [1] and integrates it via an Avalon-MM wrapper into a NIOS II SoC on the Altera Cyclone II DE2 FPGA. The design was verified with ModelSim and synthesized in Quartus II.
 
 ## SoC Integration
 
