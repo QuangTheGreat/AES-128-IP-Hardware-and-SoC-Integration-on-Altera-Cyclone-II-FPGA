@@ -8,7 +8,7 @@ This project delivers an RTL implementation of an area-efficient AES-128 encrypt
 
 ## SoC Integration
 
-The AES-128 hardware core was wrapped with a memory-mapped Avalon-MM interface to support communication with the NIOS II processor. The IP was integrated into a complete SoC system using Qsys, enabling processor-to-accelerator interaction via control and status registers. A C program was developed on the NIOS II Eclipse IDE to handle key management, data transfer, and encryption control. The full system was deployed and tested on the DE2 FPGA board.
+The AES-128 hardware core was wrapped with a memory-mapped Avalon-MM interface to support communication with the NIOS II processor. The IP was integrated into a complete SoC system using Qsys. A C program was developed on the NIOS II Eclipse IDE to handle data transfer, and encryption control. The full system was deployed and tested on the DE2 FPGA board.
 
 ## Reference
 
