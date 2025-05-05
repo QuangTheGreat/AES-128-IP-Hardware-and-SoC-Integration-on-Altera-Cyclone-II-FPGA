@@ -1,0 +1,80 @@
+`timescale 1ns/1ps
+module KeyLogicController(
+    input clk,
+    input reset,
+    input load_key,           // Tín hiệu kích hoạt khi có khóa mới
+    output reg expansion_start, // Kích hoạt bắt đầu quá trình mở rộng khóa (cho các khối con)
+    output reg phase,         // Phase: 0 - RotWord phase; 1 - KeyExpand phase
+    output reg [3:0] round_num, // Số vòng hiện tại (0: ban đầu, 1..10: các round key)
+    output reg expansion_done // Báo hiệu hoàn tất quá trình mở rộng khóa
+);
+
+    // Định nghĩa các trạng thái của FSM
+    localparam IDLE            = 2'b00,
+               ROTWORD_PHASE   = 2'b01, // Phase 0: thực hiện RotWord (và kích hoạt S_box để thực hiện SubBytes)
+               KEYEXPAND_PHASE = 2'b10, // Phase 1: tính toán round key mới (KeyExpand)
+               DONE            = 2'b11;
+    
+    reg [1:0] state, next_state;
+    
+    // Cập nhật state vào mỗi rising edge của clk hoặc khi reset
+    always @(posedge clk or posedge reset) begin
+        if (reset)
+            state <= IDLE;
+        else
+            state <= next_state;
+    end
+    
+    // Logic chuyển state (next_state)
+    always @(*) begin
+        next_state = state; // giá trị mặc định
+        case (state)
+            IDLE: 
+                if (load_key) 
+                    next_state = ROTWORD_PHASE;
+            ROTWORD_PHASE: 
+                next_state = KEYEXPAND_PHASE;
+            KEYEXPAND_PHASE: begin
+                if (round_num == 4'd10)
+                    next_state = DONE;
+                else
+                    next_state = ROTWORD_PHASE;
+            end
+            DONE: 
+                next_state = IDLE;
+            default: 
+                next_state = IDLE;
+        endcase
+    end
+
+    // Cập nhật các tín hiệu điều khiển dựa vào state
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            round_num       <= 4'd0;
+            phase           <= 1'b0;
+            expansion_start <= 1'b0;
+            expansion_done  <= 1'b0;
+        end else begin
+            case (state)
+                IDLE: begin
+                    round_num       <= 4'd0;
+                    expansion_start <= 1'b0;
+                    expansion_done  <= 1'b0;
+                end
+                ROTWORD_PHASE: begin
+                    phase           <= 1'b0; // Phase 0: RotWord (và kích hoạt tra cứu S_box cho SubBytes)
+                    expansion_start <= 1'b1; // Kích hoạt các khối con bắt đầu quá trình tính toán
+                end
+                KEYEXPAND_PHASE: begin
+                    phase           <= 1'b1; // Phase 1: KeyExpand – sử dụng kết quả từ SubBytes để tính round key mới
+                    expansion_start <= 1'b0;
+                    round_num       <= round_num + 1;
+                end
+                DONE: begin
+                    expansion_done  <= 1'b1;
+                end
+            endcase
+        end
+    end
+
+endmodule

@@ -1,0 +1,31 @@
+
+State Machine - |top|system:u0|wrapper_finalv2:ip_slave_0|AES_Top:inst|ProcessingCore:ins_ProcessingCore|ProcessingCoreController:controller|state
+Name state.FINISH state.PHASE1 state.PHASE0 state.IDLE 
+state.IDLE 0 0 0 0 
+state.PHASE0 0 0 1 1 
+state.PHASE1 0 1 0 1 
+state.FINISH 1 0 0 1 
+
+State Machine - |top|system:u0|wrapper_finalv2:ip_slave_0|AES_Top:inst|KeyLogic:ins_KeyLogic|KeyLogicController:controller|state
+Name state.DONE state.KEYEXPAND state.ROTWORD state.IDLE 
+state.IDLE 0 0 0 0 
+state.ROTWORD 0 0 1 1 
+state.KEYEXPAND 0 1 0 1 
+state.DONE 1 0 0 1 
+
+State Machine - |top|system:u0|wrapper_finalv2:ip_slave_0|AES_Top:inst|SystemController:ins_systemcontroller|state
+Name state.PCore_Prc state.wait_PCore state.wait_Keyex state.Key_Expand state.IDLE 
+state.IDLE 0 0 0 0 0 
+state.Key_Expand 0 0 0 1 1 
+state.wait_Keyex 0 0 1 0 1 
+state.wait_PCore 0 1 0 0 1 
+state.PCore_Prc 1 0 0 0 1 
+
+State Machine - |top|system:u0|system_nios2_qsys_0:nios2_qsys_0|system_nios2_qsys_0_nios2_oci:the_system_nios2_qsys_0_nios2_oci|system_nios2_qsys_0_jtag_debug_module_wrapper:the_system_nios2_qsys_0_jtag_debug_module_wrapper|system_nios2_qsys_0_jtag_debug_module_tck:the_system_nios2_qsys_0_jtag_debug_module_tck|DRsize
+Name DRsize.101 DRsize.100 DRsize.011 DRsize.010 DRsize.001 DRsize.000 
+DRsize.000 0 0 0 0 0 0 
+DRsize.001 0 0 0 0 1 1 
+DRsize.010 0 0 0 1 0 1 
+DRsize.011 0 0 1 0 0 1 
+DRsize.100 0 1 0 0 0 1 
+DRsize.101 1 0 0 0 0 1 

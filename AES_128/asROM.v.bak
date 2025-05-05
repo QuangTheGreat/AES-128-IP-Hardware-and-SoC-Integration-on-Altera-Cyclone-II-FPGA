@@ -1,0 +1,72 @@
+`timescale 1ns/1ps
+
+module ROM_2port (
+    input [7:0] addr1, addr2,  // Địa chỉ truy xuất S-Box (2 byte song song)
+    output reg [7:0] data1, data2 // Giá trị từ S-Box
+);
+
+    // S-Box ROM bất đồng bộ
+    always @(*) begin
+        case (addr1)
+            8'h00: data1 = 8'h63; 8'h01: data1 = 8'h7c; 8'h02: data1 = 8'h77; 8'h03: data1 = 8'h7b;
+            8'h04: data1 = 8'hf2; 8'h05: data1 = 8'h6b; 8'h06: data1 = 8'h6f; 8'h07: data1 = 8'hc5;
+            8'h08: data1 = 8'h30; 8'h09: data1 = 8'h01; 8'h0a: data1 = 8'h67; 8'h0b: data1 = 8'h2b;
+            8'h0c: data1 = 8'hfe; 8'h0d: data1 = 8'hd7; 8'h0e: data1 = 8'hab; 8'h0f: data1 = 8'h76;
+            8'h10: data1 = 8'hca; 8'h11: data1 = 8'h82; 8'h12: data1 = 8'hc9; 8'h13: data1 = 8'h7d;
+            8'h14: data1 = 8'hfa; 8'h15: data1 = 8'h59; 8'h16: data1 = 8'h47; 8'h17: data1 = 8'hf0;
+            8'h18: data1 = 8'had; 8'h19: data1 = 8'hd4; 8'h1a: data1 = 8'ha2; 8'h1b: data1 = 8'haf;
+            8'h1c: data1 = 8'h9c; 8'h1d: data1 = 8'ha4; 8'h1e: data1 = 8'h72; 8'h1f: data1 = 8'hc0;
+            8'h20: data1 = 8'hb7; 8'h21: data1 = 8'hfd; 8'h22: data1 = 8'h93; 8'h23: data1 = 8'h26;
+            8'h24: data1 = 8'h36; 8'h25: data1 = 8'h3f; 8'h26: data1 = 8'hf7; 8'h27: data1 = 8'hcc;
+            8'h28: data1 = 8'h34; 8'h29: data1 = 8'ha5; 8'h2a: data1 = 8'he5; 8'h2b: data1 = 8'hf1;
+            8'h2c: data1 = 8'h71; 8'h2d: data1 = 8'hd8; 8'h2e: data1 = 8'h31; 8'h2f: data1 = 8'h15;
+            8'h30: data1 = 8'h04; 8'h31: data1 = 8'hc7; 8'h32: data1 = 8'h23; 8'h33: data1 = 8'hc3;
+            8'h34: data1 = 8'h18; 8'h35: data1 = 8'h96; 8'h36: data1 = 8'h05; 8'h37: data1 = 8'h9a;
+            8'h38: data1 = 8'h07; 8'h39: data1 = 8'h12; 8'h3a: data1 = 8'h80; 8'h3b: data1 = 8'he2;
+            8'h3c: data1 = 8'heb; 8'h3d: data1 = 8'h27; 8'h3e: data1 = 8'hb2; 8'h3f: data1 = 8'h75;
+            8'h40: data1 = 8'h09; 8'h41: data1 = 8'h83; 8'h42: data1 = 8'h2c; 8'h43: data1 = 8'h1a;
+            8'h44: data1 = 8'h1b; 8'h45: data1 = 8'h6e; 8'h46: data1 = 8'h5a; 8'h47: data1 = 8'ha0;
+            8'h48: data1 = 8'h52; 8'h49: data1 = 8'h3b; 8'h4a: data1 = 8'hd6; 8'h4b: data1 = 8'hb3;
+            8'h4c: data1 = 8'h29; 8'h4d: data1 = 8'he3; 8'h4e: data1 = 8'h2f; 8'h4f: data1 = 8'h84;
+            8'h50: data1 = 8'h53; 8'h51: data1 = 8'hd1; 8'h52: data1 = 8'h00; 8'h53: data1 = 8'hed;
+            8'h54: data1 = 8'h20; 8'h55: data1 = 8'hfc; 8'h56: data1 = 8'hb1; 8'h57: data1 = 8'h5b;
+            8'h58: data1 = 8'h6a; 8'h59: data1 = 8'hcb; 8'h5a: data1 = 8'hbe; 8'h5b: data1 = 8'h39;
+            8'h5c: data1 = 8'h4a; 8'h5d: data1 = 8'h4c; 8'h5e: data1 = 8'h58; 8'h5f: data1 = 8'hcf;
+            8'hf0: data1 = 8'h8c; 8'hf1: data1 = 8'ha1; 8'hf2: data1 = 8'h89; 8'hf3: data1 = 8'h0d;
+            8'hf4: data1 = 8'hbf; 8'hf5: data1 = 8'he6; 8'hf6: data1 = 8'h42; 8'hf7: data1 = 8'h68;
+            8'hf8: data1 = 8'h41; 8'hf9: data1 = 8'h99; 8'hfa: data1 = 8'h2d; 8'hfb: data1 = 8'h0f;
+            8'hfc: data1 = 8'hb0; 8'hfd: data1 = 8'h54; 8'hfe: data1 = 8'hbb; 8'hff: data1 = 8'h16;
+        endcase
+
+        case (addr2)
+            8'h00: data2 = 8'h63; 8'h01: data2 = 8'h7c; 8'h02: data1 = 8'h77; 8'h03: data1 = 8'h7b;
+            8'h04: data2 = 8'hf2; 8'h05: data2 = 8'h6b; 8'h06: data1 = 8'h6f; 8'h07: data1 = 8'hc5;
+            8'h08: data2 = 8'h30; 8'h09: data2 = 8'h01; 8'h0a: data1 = 8'h67; 8'h0b: data1 = 8'h2b;
+            8'h0c: data2 = 8'hfe; 8'h0d: data2 = 8'hd7; 8'h0e: data1 = 8'hab; 8'h0f: data1 = 8'h76;
+            8'h10: data2 = 8'hca; 8'h11: data2 = 8'h82; 8'h12: data1 = 8'hc9; 8'h13: data1 = 8'h7d;
+            8'h14: data2 = 8'hfa; 8'h15: data2 = 8'h59; 8'h16: data1 = 8'h47; 8'h17: data1 = 8'hf0;
+            8'h18: data2 = 8'had; 8'h19: data2 = 8'hd4; 8'h1a: data1 = 8'ha2; 8'h1b: data1 = 8'haf;
+            8'h1c: data2 = 8'h9c; 8'h1d: data2 = 8'ha4; 8'h1e: data1 = 8'h72; 8'h1f: data1 = 8'hc0;
+            8'h20: data2 = 8'hb7; 8'h21: data2 = 8'hfd; 8'h22: data1 = 8'h93; 8'h23: data1 = 8'h26;
+            8'h24: data2 = 8'h36; 8'h25: data2 = 8'h3f; 8'h26: data1 = 8'hf7; 8'h27: data1 = 8'hcc;
+            8'h28: data2 = 8'h34; 8'h29: data2 = 8'ha5; 8'h2a: data1 = 8'he5; 8'h2b: data1 = 8'hf1;
+            8'h2c: data2 = 8'h71; 8'h2d: data2 = 8'hd8; 8'h2e: data1 = 8'h31; 8'h2f: data1 = 8'h15;
+            8'h30: data2 = 8'h04; 8'h31: data2 = 8'hc7; 8'h32: data1 = 8'h23; 8'h33: data1 = 8'hc3;
+            8'h34: data2 = 8'h18; 8'h35: data2 = 8'h96; 8'h36: data1 = 8'h05; 8'h37: data1 = 8'h9a;
+            8'h38: data2 = 8'h07; 8'h39: data2 = 8'h12; 8'h3a: data1 = 8'h80; 8'h3b: data1 = 8'he2;
+            8'h3c: data2 = 8'heb; 8'h3d: data2 = 8'h27; 8'h3e: data1 = 8'hb2; 8'h3f: data1 = 8'h75;
+            8'h40: data2 = 8'h09; 8'h41: data2 = 8'h83; 8'h42: data1 = 8'h2c; 8'h43: data1 = 8'h1a;
+            8'h44: data2 = 8'h1b; 8'h45: data2 = 8'h6e; 8'h46: data1 = 8'h5a; 8'h47: data1 = 8'ha0;
+            8'h48: data2 = 8'h52; 8'h49: data2 = 8'h3b; 8'h4a: data1 = 8'hd6; 8'h4b: data1 = 8'hb3;
+            8'h4c: data2 = 8'h29; 8'h4d: data2 = 8'he3; 8'h4e: data1 = 8'h2f; 8'h4f: data1 = 8'h84;
+            8'h50: data2 = 8'h53; 8'h51: data2 = 8'hd1; 8'h52: data1 = 8'h00; 8'h53: data1 = 8'hed;
+            8'h54: data2 = 8'h20; 8'h55: data2 = 8'hfc; 8'h56: data1 = 8'hb1; 8'h57: data1 = 8'h5b;
+            8'h58: data2 = 8'h6a; 8'h59: data2 = 8'hcb; 8'h5a: data1 = 8'hbe; 8'h5b: data1 = 8'h39;
+            8'h5c: data2 = 8'h4a; 8'h5d: data2 = 8'h4c; 8'h5e: data1 = 8'h58; 8'h5f: data1 = 8'hcf;
+            8'hf0: data2 = 8'h8c; 8'hf1: data2 = 8'ha1; 8'hf2: data1 = 8'h89; 8'hf3: data1 = 8'h0d;
+            8'hf4: data2 = 8'hbf; 8'hf5: data2 = 8'he6; 8'hf6: data1 = 8'h42; 8'hf7: data1 = 8'h68;
+            8'hf8: data2 = 8'h41; 8'hf9: data2 = 8'h99; 8'hfa: data1 = 8'h2d; 8'hfb: data1 = 8'h0f;
+            8'hfc: data2 = 8'hb0; 8'hfd: data2 = 8'h54; 8'hfe: data1 = 8'hbb; 8'hff: data1 = 8'h16;
+        endcase
+    end
+endmodule

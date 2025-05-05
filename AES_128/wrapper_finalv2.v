@@ -1,0 +1,100 @@
+module wrapper_finalv2(
+    input         iClk,
+    input         iReset_n,
+    input         iChipSelect_n,
+    input         iWrite_n,
+    input         iRead_n,
+    input  [3:0]  iAddress,
+    input  [31:0] iData,
+    output reg [31:0] oData
+);
+
+    reg  [127:0] in_data;
+    reg  [127:0] temp_result;
+    wire         Ready_new_input;
+    wire         CTValid;
+    wire [127:0] CipherText;
+
+    AES_Top inst (
+        .clk(iClk),
+        .rst(~iReset_n),
+        .in_data(in_data),
+        .Load_Key(Load_Key),
+        .Load_Data(Load_Data),
+        .Ready_new_input(Ready_new_input),
+        .CTValid(CTValid),
+        .CipherText(CipherText)
+    );
+
+    // Edge detector for write pulse
+	reg Load_Data, Load_Key;
+	reg tmp_valid;
+	reg reset_flag;
+    // Capture CipherText when CTValid is high
+    always @(posedge iClk or negedge iReset_n) begin
+        if (~iReset_n) begin
+            temp_result <= 128'd0;
+				tmp_valid <= 1'b0;
+			end
+        else begin
+				if(CTValid) begin
+					temp_result <= CipherText;
+					tmp_valid <= 1'b1;
+				end
+				if(reset_flag) tmp_valid <=1'b0;
+		  end
+    end
+
+    // Main logic
+    always @(posedge iClk or negedge iReset_n) begin
+        if (~iReset_n) begin
+            in_data   <= 128'd0;
+            Load_Data <= 1'b0;
+            Load_Key  <= 1'b0;
+            oData     <= 32'd0;
+				reset_flag <= 1'b0;
+        end 
+		  else begin
+            // Default: clear pulse
+            Load_Data <= 1'b0;
+            Load_Key  <= 1'b0;
+				reset_flag <= 1'b0;
+
+            // Handle write pulse
+            if (~iChipSelect_n && ~iWrite_n) begin
+                case (iAddress)
+                    4'd0: in_data[127:96] <= iData;
+                    4'd1: in_data[95:64]  <= iData;
+                    4'd2: in_data[63:32]  <= iData;
+                    4'd3: in_data[31:0]   <= iData;
+                    4'd4: begin 
+									Load_Data	<= 1'b1;
+									reset_flag	<= 1'b1;
+									end
+                    4'd5: begin
+									Load_Key		<= 1'b1;	
+									reset_flag	<= 1'b1;
+									end
+                endcase
+            end
+
+            // Handle read
+            if (~iChipSelect_n && ~iRead_n) begin
+                case (iAddress)
+                    4'd6: oData <= temp_result[127:96];
+                    4'd7: oData <= temp_result[95:64];
+                    4'd8: oData <= temp_result[63:32];
+                    4'd9: oData <= temp_result[31:0];
+                    4'd10: oData <= {31'd0, tmp_valid};
+                    4'd11: oData <= in_data[127:96];
+						  4'd12: oData <= in_data[95:64];
+						  4'd13: oData <= in_data[63:32];
+						  4'd14: oData <= in_data[31:0];
+						  4'd15: oData <= {31'd0,Ready_new_input};
+                    default: oData <= 32'd0;
+                endcase
+            end
+        end
+    end
+
+endmodule

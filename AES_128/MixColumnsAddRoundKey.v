@@ -1,0 +1,69 @@
+`timescale 1ns/1ps
+module MixColumnsAddRoundKey(
+    input  [127:0] in_state,
+    input  [127:0] roundKey,
+    output [127:0] out_state
+);
+    // Ví dụ sử dụng hàm xtime cho phép nhân trong GF(2^8)
+    function [7:0] xtime;
+        input [7:0] b;
+        begin
+            xtime = {b[6:0], 1'b0} ^ (8'h1b & {8{b[7]}});
+        end
+    endfunction
+
+    function [7:0] mult3;
+        input [7:0] b;
+        begin
+            mult3 = xtime(b) ^ b;
+        end
+    endfunction
+
+    // Tách state thành 16 byte
+    wire [7:0] s0  = in_state[127:120];
+    wire [7:0] s1  = in_state[119:112];
+    wire [7:0] s2  = in_state[111:104];
+    wire [7:0] s3  = in_state[103:96];
+    wire [7:0] s4  = in_state[95:88];
+    wire [7:0] s5  = in_state[87:80];
+    wire [7:0] s6  = in_state[79:72];
+    wire [7:0] s7  = in_state[71:64];
+    wire [7:0] s8  = in_state[63:56];
+    wire [7:0] s9  = in_state[55:48];
+    wire [7:0] s10 = in_state[47:40];
+    wire [7:0] s11 = in_state[39:32];
+    wire [7:0] s12 = in_state[31:24];
+    wire [7:0] s13 = in_state[23:16];
+    wire [7:0] s14 = in_state[15:8];
+    wire [7:0] s15 = in_state[7:0];
+
+    // Ví dụ xử lý MixColumns cho mỗi cột (tùy chỉnh lại công thức theo chuẩn AES)
+    wire [7:0] r0, r1, r2, r3;
+    assign r0 = xtime(s0) ^ mult3(s1) ^ s2 ^ s3;
+    assign r1 = s0 ^ xtime(s1) ^ mult3(s2) ^ s3;
+    assign r2 = s0 ^ s1 ^ xtime(s2) ^ mult3(s3);
+    assign r3 = mult3(s0) ^ s1 ^ s2 ^ xtime(s3);
+
+    wire [7:0] r4, r5, r6, r7;
+    assign r4 = xtime(s4) ^ mult3(s5) ^ s6 ^ s7;
+    assign r5 = s4 ^ xtime(s5) ^ mult3(s6) ^ s7;
+    assign r6 = s4 ^ s5 ^ xtime(s6) ^ mult3(s7);
+    assign r7 = mult3(s4) ^ s5 ^ s6 ^ xtime(s7);
+
+    wire [7:0] r8, r9, r10, r11;
+    assign r8  = xtime(s8)  ^ mult3(s9)  ^ s10 ^ s11;
+    assign r9  = s8  ^ xtime(s9)  ^ mult3(s10) ^ s11;
+    assign r10 = s8  ^ s9  ^ xtime(s10) ^ mult3(s11);
+    assign r11 = mult3(s8)  ^ s9  ^ s10 ^ xtime(s11);
+
+    wire [7:0] r12, r13, r14, r15;
+    assign r12 = xtime(s12) ^ mult3(s13) ^ s14 ^ s15;
+    assign r13 = s12 ^ xtime(s13) ^ mult3(s14) ^ s15;
+    assign r14 = s12 ^ s13 ^ xtime(s14) ^ mult3(s15);
+    assign r15 = mult3(s12) ^ s13 ^ s14 ^ xtime(s15);
+
+    wire [127:0] mix_state;
+    assign mix_state = {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15};
+
+    assign out_state = mix_state ^ roundKey;
+endmodule

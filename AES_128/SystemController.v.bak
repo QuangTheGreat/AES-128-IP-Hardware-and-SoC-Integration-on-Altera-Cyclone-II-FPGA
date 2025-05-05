@@ -1,0 +1,10 @@
+module SystemController(
+	input clk,
+	input rst,
+	input KeyLogicDone,
+	input PCoreDone,
+	output KeyLogicMode,
+	output KeyLogicStart,
+	output PCoreStart,
+	output SBoxSel
+);

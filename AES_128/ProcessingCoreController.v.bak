@@ -1,0 +1,68 @@
+`timescale 1ns/1ps
+module ProcessingCoreController(
+    input clk,
+    input reset,
+    input start,               // Bắt đầu xử lý block mới
+    output reg phase,        // 0: Phase 0 (SubBytes/ShiftRows), 1: Phase 1 (MixCol+AddKey)
+    output reg [3:0] roundCount, // Đếm round: 1 đến 10
+    output reg done          // Báo hiệu block đã hoàn thành mã hóa
+);
+    localparam IDLE   = 2'b00,
+               PHASE0 = 2'b01,
+               PHASE1 = 2'b10,
+               FINISH = 2'b11;
+    reg [1:0] state, next_state;
+    
+    // Cập nhật state
+    always @(posedge clk or posedge reset) begin
+        if (reset)
+            state <= IDLE;
+        else
+            state <= next_state;
+    end
+    
+    // Logic chuyển trạng thái
+    always @(*) begin
+        next_state = state;
+        case (state)
+            IDLE: if (start) next_state = PHASE0;
+            PHASE0: next_state = PHASE1;
+            PHASE1: begin
+                if (roundCount == 4'd10)
+                    next_state = FINISH;
+                else
+                    next_state = PHASE0;
+            end
+            FINISH: next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    // Cập nhật tín hiệu điều khiển
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            roundCount <= 4'd0;
+            phase      <= 1'b0;
+            done       <= 1'b0;
+        end else begin
+            case (state)
+                IDLE: begin
+                    roundCount <= 4'd0;
+                    phase      <= 1'b0;
+                    done       <= 1'b0;
+                end
+                PHASE0: begin
+                    phase <= 1'b0; // Phase 0: gửi state ra ngoài để S_box xử lý SubBytes (và ShiftRows đã được thực hiện nội bộ nếu cần)
+                end
+                PHASE1: begin
+                    phase <= 1'b1; // Phase 1: MixColumns + AddRoundKey
+                    roundCount <= roundCount + 1;
+                end
+                FINISH: begin
+                    done <= 1'b1;
+                end
+            endcase
+        end
+    end
+
+endmodule

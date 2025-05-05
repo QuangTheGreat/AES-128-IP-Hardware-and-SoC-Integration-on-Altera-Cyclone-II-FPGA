@@ -1,0 +1,60 @@
+`timescale 1ns/1ps
+module ProcessingCore(
+    input clk,
+    input reset,
+    input start,                   // Bắt đầu mã hóa block mới
+    input [127:0] inputBlk,        // Plaintext ban đầu (sau vòng khởi tạo)
+    input [127:0] roundKey,        // Round key cho round hiện tại (được cung cấp từ KeyLogic)
+    input [127:0] subShift_data_in, // Kết quả từ bên ngoài S_box (sau SubBytes)
+    output [127:0] cipherText,     // Ciphertext cuối cùng sau 10 round
+    output cTValid,                // Báo hiệu block đã mã hóa xong
+    output [127:0] shift_out       // Dữ liệu state gửi ra ngoài để S_box xử lý (Phase 0)
+);
+    // State register lưu trạng thái block hiện tại
+    reg [127:0] stateReg;
+    
+    // Controller FSM
+    wire phase;            // 0: Phase0, 1: Phase1
+    wire [3:0] roundCount;
+    wire done;
+    ProcessingCoreController controller(
+        .clk(clk),
+        .reset(reset),
+        .start(start),
+        .phase(phase),
+        .roundCount(roundCount),
+        .done(done)
+    );
+    
+    // Ở Phase 0: Core xuất state ra ngoài để S_box xử lý
+    // shift_out = stateReg
+    assign shift_out = stateReg;
+    
+    // MixColumns + AddRoundKey module: nhận kết quả sau SubBytes (vào subShift_data_in) và roundKey
+    wire [127:0] mixAdd_out;
+    MixColumnsAddRoundKey mixAdd(
+        .in_state(subShift_data_in),
+        .roundKey(roundKey),
+        .out_state(mixAdd_out)
+    );
+    
+    // Cập nhật stateReg dựa vào phase của controller
+    // Khi chuyển từ Phase1 -> Phase0 (tức sau khi MixColumnsAddRoundKey xong), cập nhật stateReg
+    always @(posedge clk or posedge reset) begin
+        if (reset)
+            stateReg <= 128'b0;
+        else begin
+            // Ở IDLE: nạp inputBlk khi start
+            if(controller.roundCount == 4'd0 && phase == 1'b0 && start)
+                stateReg <= inputBlk;
+            // Ở Phase1, sau khi MixColumnsAddRoundKey, cập nhật stateReg
+            else if(phase == 1'b1)
+                stateReg <= mixAdd_out;
+        end
+    end
+
+    // Khi controller báo done (sau 10 round), kết quả mã hóa là stateReg
+    assign cipherText = (done) ? stateReg : 128'b0;
+    assign cTValid = done;
+    
+endmodule

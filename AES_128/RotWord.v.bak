@@ -1,0 +1,8 @@
+`timescale 1ns/1ps
+module RotWord(
+    input  [31:0] in,
+    output [31:0] out
+);
+    // Xoay vòng: [a0,a1,a2,a3] -> [a1,a2,a3,a0]
+    assign out = {in[23:0], in[31:24]};
+endmodule

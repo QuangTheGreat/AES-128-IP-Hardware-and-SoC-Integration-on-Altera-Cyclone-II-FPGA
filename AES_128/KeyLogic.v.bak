@@ -1,0 +1,61 @@
+`timescale 1ns/1ps
+module KeyLogic(
+    input clk,
+    input reset,
+    input load_key,           // Tín hiệu từ Input Interface khi có khóa mới
+    input [127:0] cipher_key, // Khóa cipher ban đầu (128-bit)
+    input [3:0] sel_round,    // Địa chỉ round key cần truy xuất (0 đến 10)
+    output [127:0] round_key, // Round key xuất ra cho Encryption Core
+    output expansion_done     // Báo hiệu quá trình mở rộng khóa đã hoàn tất
+);
+    // Bộ nhớ lưu 11 round key (index 0: khóa ban đầu, 1..10: round key)
+    reg [127:0] key_reg [0:10];
+    integer i;
+    
+    // Khi có LoadKey, lưu khóa ban đầu vào key_reg[0]
+    always @(posedge clk or posedge reset) begin
+        if(reset) begin
+            for(i=0; i<11; i=i+1)
+                key_reg[i] <= 128'b0;
+        end else if(load_key) begin
+            key_reg[0] <= cipher_key;
+        end
+    end
+    
+    // Controller FSM
+    wire controller_exp_start;
+    wire controller_phase;
+    wire [3:0] controller_round;
+    wire controller_done;
+    KeyExpansionController controller(
+        .clk(clk),
+        .reset(reset),
+        .load_key(load_key),
+        .expansion_start(controller_exp_start),
+        .phase(controller_phase),
+        .round_num(controller_round),
+        .expansion_done(controller_done)
+    );
+    
+    // Round Key Expander: thực hiện mở rộng từng vòng
+    wire [127:0] new_round_key;
+    RoundKeyExpander rke(
+        .clk(clk),
+        .phase(controller_phase),
+        .prev_key(key_reg[controller_round]),
+        .round_num(controller_round),
+        .new_round_key(new_round_key)
+    );
+    
+    // Khi ở phase 2, kết quả mở rộng của round hiện tại được lưu vào key_reg[round+1]
+    always @(posedge clk) begin
+        if(controller_phase && (controller_round != 0)) begin
+            key_reg[controller_round] <= new_round_key;
+        end
+    end
+    
+    // Cho hệ thống Encryption truy xuất round key từ register file
+    assign round_key = key_reg[sel_round];
+    assign expansion_done = controller_done;
+    
+endmodule

@@ -1,0 +1,31 @@
+module InputInterface(
+    input         clk,
+    input         rst,
+    input         LoadKey,
+    input         LoadData,
+    input  [127:0] InData,    // Key/Plaintext
+    output reg [127:0] KeyOut,
+    output reg [127:0] DataOut,
+    output reg    KeyReady,
+    output reg    DataReady
+);
+    always @(posedge clk or posedge rst) begin
+        if(rst) begin
+            KeyOut   <= 128'b0;
+            DataOut  <= 128'b0;
+            KeyReady <= 1'b0;
+            DataReady <= 1'b0;
+        end else begin
+            KeyReady  <= 1'b0;
+            DataReady <= 1'b0;
+            if(LoadKey) begin
+                KeyOut   <= InData;
+                KeyReady <= 1'b1;
+            end
+            if(LoadData) begin
+                DataOut   <= InData;
+                DataReady <= 1'b1;
+            end
+        end
+    end
+endmodule
